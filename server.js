@@ -6,7 +6,13 @@ import { generateChat } from "./run_model.js";
 dotenv.config();
 
 const app = express();
-app.use(cors()); // adjust origin in production
+
+// Set the allowed origin for CORS
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000"; // Default to local frontend
+
+app.use(cors({
+  origin: FRONTEND_URL, // Allow requests only from this origin
+}));
 app.use(express.json());
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
