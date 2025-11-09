@@ -53,9 +53,6 @@
       target: 'esnext',
       outDir: 'build',
     },
-    define: {
-    'process.env.NEXT_PUBLIC_API_URL': JSON.stringify(process.env.NEXT_PUBLIC_API_URL)
-  },
     server: {
       port: 3000,
       open: true,
