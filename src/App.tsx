@@ -14,10 +14,7 @@ interface Message {
   timestamp: Date;
 }
 
-const API_URL =
-  (typeof process !== 'undefined' && (process.env as any)?.NEXT_PUBLIC_API_URL) ||
-  (typeof window !== 'undefined' && (window as any).__APP_ENV__?.NEXT_PUBLIC_API_URL) ||
-  'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 async function sendChatMessageToBackend(message: string) {
   const res = await fetch(`${API_URL}/api/chat`, {
