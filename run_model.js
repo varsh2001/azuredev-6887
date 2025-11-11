@@ -9,7 +9,7 @@ dotenv.config();
  * @param {string} userMessage
  * @returns {Promise<any>}
  */
-export async function generateChat(userMessage = "Test question: What is 2+2?") {
+export async function generateChat(messages) {
   const endpoint = process.env["AZURE_OPENAI_ENDPOINT"] || "https://vchan-mhpvydh4-eastus2.cognitiveservices.azure.com/";
   const apiKey = process.env["AZURE_OPENAI_API_KEY"] || "<REPLACE_WITH_YOUR_KEY_VALUE_HERE>";
   const apiVersion = "2025-01-01-preview";
@@ -18,10 +18,7 @@ export async function generateChat(userMessage = "Test question: What is 2+2?") 
   const client = new AzureOpenAI({ endpoint, apiKey, apiVersion, deployment });
 
   const result = await client.chat.completions.create({
-    messages: [
-      { role: "system", content: "You are an AI assistant that helps people find information." },
-      { role: "user", content: userMessage }
-    ],
+    messages,
     max_completion_tokens: 800
   });
 

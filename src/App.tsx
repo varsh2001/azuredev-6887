@@ -14,12 +14,26 @@ interface Message {
   timestamp: Date;
 }
 
-const API_URL = import.meta.env.VITE_API_URL||"https://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+async function fetchChatHistory() {
+  const res = await fetch(`${API_URL}/api/history`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(body?.error || res.statusText);
+  }
+  return res.json();
+}
 
 async function sendChatMessageToBackend(message: string) {
   const res = await fetch(`${API_URL}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ message }),
   });
   if (!res.ok) {
@@ -30,18 +44,40 @@ async function sendChatMessageToBackend(message: string) {
 }
 
 export default function App() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hello! I'm your AI assistant. How can I help you today?",
-      isUser: false,
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const history = await fetchChatHistory();
+        const formattedHistory = history
+          .filter((msg: any) => msg.role !== 'system')
+          .map((msg: any, index: number) => ({
+            id: `${Date.now()}-${index}`,
+            text: msg.content,
+            isUser: msg.role === 'user',
+            timestamp: new Date(),
+          }));
+        setMessages(formattedHistory);
+      } catch (error) {
+        console.error("Failed to fetch chat history:", error);
+        // Set a default initial message on error
+        setMessages([
+          {
+            id: '1',
+            text: "Hello! I'm your AI assistant. How can I help you today?",
+            isUser: false,
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    };
+    loadHistory();
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
